@@ -32,6 +32,11 @@ public class PhotoController {
         return service.getByUser(userId);
     }
 
+    @GetMapping("/album/{albumId}")
+    public List<Photo> byAlbum(@PathVariable Long albumId) {
+        return service.getByAlbum(albumId);
+    }
+
     @PostMapping
     public Photo create(@RequestBody Photo photo) {
         return service.save(photo);
