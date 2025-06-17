@@ -1,0 +1,5 @@
+com/photoalbum/model/Photo.class
+com/photoalbum/service/PhotoService.class
+com/photoalbum/PhotoalbumApplication.class
+com/photoalbum/repository/PhotoRepository.class
+com/photoalbum/controller/PhotoController.class
