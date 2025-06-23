@@ -1,49 +1,63 @@
 package com.photoalbum.controller;
 
+import com.photoalbum.model.Album;
 import com.photoalbum.model.Photo;
 import com.photoalbum.service.PhotoService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/photos")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PhotoController {
 
-    private final PhotoService service;
+    private final PhotoService photoService;
 
-    public PhotoController(PhotoService service) {
-        this.service = service;
+    public PhotoController(PhotoService photoService) {
+        this.photoService = photoService;
     }
 
-    @GetMapping
-    public List<Photo> all() {
-        return service.getAll();
-    }
+    @PostMapping("/upload")
+    public Photo uploadPhoto(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("albumId") Long albumId,
+            @RequestParam("userId") Long userId
+    ) throws IOException {
+        String imageUrl = saveImageToDisk(file);
 
-    @GetMapping("/{id}")
-    public Photo one(@PathVariable Long id) {
-        return service.getOne(id);
-    }
+        Photo photo = new Photo();
+        photo.setUrl(imageUrl);
+        photo.setUserId(userId);
 
-    @GetMapping("/user/{userId}")
-    public List<Photo> byUser(@PathVariable Long userId) {
-        return service.getByUser(userId);
+        Album album = new Album();
+        album.setId(albumId);
+        photo.setAlbum(album);
+
+        return photoService.save(photo);
     }
 
     @GetMapping("/album/{albumId}")
     public List<Photo> byAlbum(@PathVariable Long albumId) {
-        return service.getByAlbum(albumId);
+        return photoService.getByAlbum(albumId);
     }
 
-    @PostMapping
-    public Photo create(@RequestBody Photo photo) {
-        return service.save(photo);
+    private String saveImageToDisk(MultipartFile file) throws IOException {
+        String folder = "uploads/";
+        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path path = Paths.get(folder + filename);
+        Files.createDirectories(path.getParent());
+        Files.write(path, file.getBytes());
+        return "http://localhost:7070/uploads/" + filename;
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public void deletePhoto(@PathVariable Long id) {
+        photoService.delete(id);
     }
+
 }
