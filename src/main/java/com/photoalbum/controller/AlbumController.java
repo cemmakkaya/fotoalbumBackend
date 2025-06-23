@@ -8,7 +8,8 @@ import com.photoalbum.repository.PhotoRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -30,8 +31,9 @@ public class AlbumController {
         this.photoRepository = photoRepository;
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Album> getAlbumsByUser(@PathVariable String userId) {
+    @GetMapping("/user")
+    public List<Album> getAlbumsByToken(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
         return albumRepository.findByUserId(Long.valueOf(userId));
     }
 
