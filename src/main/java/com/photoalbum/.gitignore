@@ -1,2 +1,18 @@
-# .gitignore
+# Java
 /target/
+/*.log
+*.class
+*.jar
+
+# Node
+/node_modules/
+/dist/
+/.angular/
+
+# IDEs
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
