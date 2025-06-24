@@ -18,7 +18,8 @@ public class Album {
     @Column(length = 85)
     private String description;
 
-    private String imageUrl; // ✅ <-- hier ist dein Bildpfad
+    private String imageUrl;
 
-    private Long userId;
+    @Column(nullable = false)
+    private String userId;
 }

@@ -24,7 +24,7 @@ public class AlbumService {
     }
 
     public List<Album> getByUser(Long userId) {
-        return repository.findByUserId(userId);
+        return repository.findByUserId(String.valueOf(userId));
     }
 
     public Album save(Album album) {

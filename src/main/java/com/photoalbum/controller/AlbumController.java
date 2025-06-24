@@ -5,11 +5,13 @@ import com.photoalbum.model.Photo;
 import com.photoalbum.service.AlbumService;
 import com.photoalbum.repository.AlbumRepository;
 import com.photoalbum.repository.PhotoRepository;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -32,11 +34,10 @@ public class AlbumController {
     }
 
     @GetMapping("/user")
-    public List<Album> getAlbumsByToken(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        return albumRepository.findByUserId(Long.valueOf(userId));
+    public List<Album> getUserAlbums(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject(); // eindeutige Benutzer-ID von Keycloak
+        return albumRepository.findByUserId(userId);
     }
-
 
     @PostMapping("/upload")
     public Album uploadAlbum(
@@ -44,7 +45,7 @@ public class AlbumController {
             @RequestParam("titel") String titel,
             @RequestParam("jahr") int jahr,
             @RequestParam("beschreibung") String beschreibung,
-            @RequestParam("userId") Long userId
+            @AuthenticationPrincipal Jwt jwt
     ) throws IOException {
         String imageUrl = saveImageToDisk(file);
 
@@ -52,7 +53,8 @@ public class AlbumController {
         album.setTitle(titel);
         album.setYear(jahr);
         album.setDescription(beschreibung);
-        album.setUserId(userId);
+        album.setUserId(jwt.getSubject());
+
         album.setImageUrl(imageUrl);
 
         return service.save(album);
@@ -64,7 +66,7 @@ public class AlbumController {
             return ResponseEntity.notFound().build();
         }
 
-        // Lösche alle verknüpften Fotos vom Album
+
         List<Photo> photos = photoRepository.findByAlbumId(id);
         for (Photo photo : photos) {
             if (photo.getUrl() != null) {
@@ -75,7 +77,7 @@ public class AlbumController {
                         file.delete();
                     }
                 } catch (Exception e) {
-                    System.err.println("Fehler beim Löschen von Bilddatei: " + e.getMessage());
+                    System.err.println("Fehler beim Löschen der Bilddatei: " + e.getMessage());
                 }
             }
             photoRepository.delete(photo);
